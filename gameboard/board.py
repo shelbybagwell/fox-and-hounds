@@ -34,9 +34,29 @@ class GameBoard:
 
     def move_piece(self, start_pos, end_pos):
         # check if move is valid
+        avail_moves = self.get_available_moves(self.current_player)
+        if (start_pos, end_pos) not in avail_moves:
+            print(
+                f"ERROR: Player {self.current_player} - Invalid move: {start_pos} to {end_pos}"
+            )
+            return False
+
         # update board state
+        piece = self.board[start_pos]
+        self.board[end_pos] = piece
+        self.board[start_pos] = 0  # spot is now empty
+
         # switch player turn
-        return
+        winner = self.check_win()
+        if winner:
+            # do something
+            pass
+        if self.current_player == "FOX":
+            self.current_player = "HOUNDS"
+        else:
+            self.current_player = "FOX"
+
+        return True
 
     def get_piece_moves(self, r, c):
         moves = []
@@ -83,11 +103,24 @@ class GameBoard:
         return all_moves
 
     def check_win(self):
-        # to be run after each move
-        # FOX wins if road is pos-5
-        # HOUNDS win if no available moves
-        # return None if no winner yet
-        return
+        fox_pos = np.argwhere(self.board == 2)
+        fox_r, fox_c = fox_pos[0]
+
+        # is fox at the end?
+        if fox_r == 5:
+            self.game_over = True
+            winner = "FOX"
+            return winner
+
+        # can fox not move anymore?
+        if self.current_player == "FOX":
+            fox_moves = self.get_available_moves("FOX")
+            if not fox_moves:
+                self.game_over = True
+                winner = "HOUNDS"
+
+        # nobody wins yet
+        return None
 
     def render_board(self):
         # plot board and display
