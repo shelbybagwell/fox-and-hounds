@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.colors import LogNorm
+from matplotlib.colors import ListedColormap
 
 
 class GameBoard:
@@ -123,5 +123,38 @@ class GameBoard:
         return None
 
     def render_board(self):
-        # plot board and display
-        return
+        fig, ax = plt.subplots(figsize=(6, 6))
+
+        cmap = ListedColormap(["black", "white"])
+        board_display = np.zeros((self.board_size, self.board_size))
+        for r in range(self.board_size):
+            for c in range(self.board_size):
+                board_display[r, c] = (r + c) % 2
+
+        ax.imshow(board_display, cmap=cmap, interpolation="nearest")
+
+        for r in range(self.board_size):
+            for c in range(self.board_size):
+                if self.board[r, c] == 1:
+                    ax.scatter(
+                        c,
+                        r,
+                        color="blue",
+                        s=500,
+                        edgecolors="black",
+                        linewidth=2,
+                    )
+                elif self.board[r, c] == 2:
+                    ax.scatter(
+                        c,
+                        r,
+                        color="red",
+                        s=500,
+                        edgecolors="black",
+                        linewidth=2,
+                    )
+
+        ax.set_xticks(np.arange(self.board_size))
+        ax.set_yticks(np.arange(self.board_size))
+        ax.set_title(f"Turn: {self.current_player}")
+        plt.show()
