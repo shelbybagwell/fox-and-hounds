@@ -22,13 +22,13 @@ class GameBoard:
                     board[r, c] = -1  # light square, all 0s are dark
 
         # Set up Initial Hounds
-        board[5, 0] = 1
-        board[5, 2] = 1
-        board[5, 4] = 1
-        board[4, 1] = 1
+        board[5, 3] = 1
+        board[4, 4] = 1
+        board[5, 5] = 1
+        board[3, 5] = 1
 
         # Set up initial fox
-        board[0, 5] = 2  # top corner
+        board[0, 0] = 2  # top left corner
 
         return board
 
@@ -51,10 +51,12 @@ class GameBoard:
         if winner:
             # do something
             pass
-        if self.current_player == "FOX":
-            self.current_player = "HOUNDS"
-        else:
-            self.current_player = "FOX"
+        # commenting this out for now, I want to
+        # just move the fox around
+        # if self.current_player == "FOX":
+        #     self.current_player = "HOUNDS"
+        # else:
+        #     self.current_player = "FOX"
 
         return True
 
@@ -78,7 +80,8 @@ class GameBoard:
             if (
                 0 <= nr < self.board_size  # valid row
                 and 0 <= nc < self.board_size  # valid column
-                and self.board[nr, nc] == 0  # space is unoccupied
+                and (self.board[nr, nc] == 0  # space is unoccupied 
+                     or self.board[nr, nc] == -1)  # light square
             ):
                 moves.append((nr, nc))
 
