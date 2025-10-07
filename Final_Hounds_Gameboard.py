@@ -71,7 +71,11 @@ def _apply_fox_move_clone(board: GameBoard, to_pos):
 
 def _is_terminal(board: GameBoard):
     """Match your win rules: FOX wins at (5,1); HOUNDS win if FOX has no legal moves."""
-    fr, fc = _fox_pos(board)
+    pos = _fox_pos(board)
+    if pos is None:
+        print(f"Error, could not apply move")
+        return
+    fr, fc = pos
     if (fr, fc) == (5, 1):
         return "FOX"
     if len(_legal_fox_moves(board)) == 0:
