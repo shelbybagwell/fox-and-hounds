@@ -57,7 +57,11 @@ def _apply_hound_move_clone(board: GameBoard, move):
 
 def _apply_fox_move_clone(board: GameBoard, to_pos):
     nb = copy.deepcopy(board)
-    fr, fc = _fox_pos(nb)
+    pos = _fox_pos(nb)
+    if pos is None:
+        print(f"Error, could not apply move")
+        return
+    fr, fc = pos
     tr, tc = to_pos
     nb.board[tr, tc] = 2
     nb.board[fr, fc] = 0
