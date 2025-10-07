@@ -110,7 +110,7 @@ class GameBoard:
         fox_r, fox_c = fox_pos[0]
 
         # is fox at the end?
-        if fox_r == 5 and fox_c == 1:
+        if fox_r == 5 and fox_c == 5:
             print("fox_r, fox_c", fox_r, fox_c)
             self.game_over = True
             winner = "FOX"
