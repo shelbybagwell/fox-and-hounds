@@ -27,7 +27,7 @@ def dijkstra(board):
     fox_pos = np.argwhere(board == 2)
     fox_r, fox_c = fox_pos[0]
     # target is bottom right
-    target = (5, 1)
+    target = (5, 5)
     # create set of unvisited nodes
     unvisited = set()
     for r in range(6):
