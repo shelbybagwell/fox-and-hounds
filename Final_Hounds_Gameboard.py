@@ -163,6 +163,7 @@ def Hounds_Minimax_AI_d4(board: GameBoard):
     return Hounds_Minimax_AI(board, depth=4)
 
 
+my_board = GameBoard()
 # Random Hounds turn
 my_board.current_player = "HOUNDS"
 hm = Hounds_Random_AI(my_board)  # -> ((fr,fc),(tr,tc))
