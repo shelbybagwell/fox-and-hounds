@@ -92,7 +92,11 @@ def evaluate_for_hounds(board: GameBoard) -> float:
         return 1e9
     if term == "FOX":
         return -1e9
-    fr, fc = _fox_pos(board)
+    pos = _fox_pos(board)
+    if pos is None:
+        print(f"Error, could not evaluate")
+        return -99999.9
+    fr, fc = pos
     gr, gc = (5, 1)  # your fox goal
     dist_goal = max(
         abs(gr - fr), abs(gc - fc)
