@@ -1,33 +1,50 @@
 # ===== Hounds AIs compatible with your GameBoard =====
 import copy, math, numpy as np
 
+from gameboard.board import GameBoard
+
 # --- Helpers bound to your GameBoard representation ---
+
 
 def _fox_pos(board: GameBoard):
     pos = np.argwhere(board.board == 2)
     return tuple(pos[0]) if len(pos) else None
 
+
 def _legal_fox_moves(board: GameBoard):
     """Fox moves on dark squares only (board == 0), diagonal in matrix coords."""
-    fr, fc = _fox_pos(board)
-    if fr is None: 
+    pos = _fox_pos(board)
+    if pos is None:
         return []
+    fr, fc = pos
     moves = []
-    for dr, dc in [(-1,-1), (-1,+1), (+1,-1), (+1,+1)]:
+    for dr, dc in [(-1, -1), (-1, +1), (+1, -1), (+1, +1)]:
         nr, nc = fr + dr, fc + dc
-        if 0 <= nr < 6 and 0 <= nc < 6 and ((nr + nc) % 2 == 0) and board.board[nr, nc] == 0:
+        if (
+            0 <= nr < 6
+            and 0 <= nc < 6
+            and ((nr + nc) % 2 == 0)
+            and board.board[nr, nc] == 0
+        ):
             moves.append((nr, nc))
     return moves
+
 
 def _legal_hound_moves(board: GameBoard):
     """Returns list of ((fr,fc),(tr,tc)) for exactly one hound move."""
     moves = []
     for hr, hc in np.argwhere(board.board == 1):
-        for dr, dc in [(-1,-1), (-1,+1)]:   # forward-only
+        for dr, dc in [(-1, -1), (-1, +1)]:  # forward-only
             nr, nc = hr + dr, hc + dc
-            if 0 <= nr < 6 and 0 <= nc < 6 and ((nr + nc) % 2 == 0) and board.board[nr, nc] == 0:
+            if (
+                0 <= nr < 6
+                and 0 <= nc < 6
+                and ((nr + nc) % 2 == 0)
+                and board.board[nr, nc] == 0
+            ):
                 moves.append(((hr, hc), (nr, nc)))
     return moves
+
 
 def _apply_hound_move_clone(board: GameBoard, move):
     nb = copy.deepcopy(board)
@@ -36,6 +53,7 @@ def _apply_hound_move_clone(board: GameBoard, move):
     nb.board[fr, fc] = 0
     nb.current_player = "FOX"
     return nb
+
 
 def _apply_fox_move_clone(board: GameBoard, to_pos):
     nb = copy.deepcopy(board)
@@ -46,6 +64,7 @@ def _apply_fox_move_clone(board: GameBoard, to_pos):
     nb.current_player = "HOUNDS"
     return nb
 
+
 def _is_terminal(board: GameBoard):
     """Match your win rules: FOX wins at (5,1); HOUNDS win if FOX has no legal moves."""
     fr, fc = _fox_pos(board)
@@ -55,20 +74,30 @@ def _is_terminal(board: GameBoard):
         return "HOUNDS"
     return None
 
+
 # --- Heuristic (higher = better for Hounds) ---
+
 
 def evaluate_for_hounds(board: GameBoard) -> float:
     term = _is_terminal(board)
-    if term == "HOUNDS": return 1e9
-    if term == "FOX":    return -1e9
+    if term == "HOUNDS":
+        return 1e9
+    if term == "FOX":
+        return -1e9
     fr, fc = _fox_pos(board)
     gr, gc = (5, 1)  # your fox goal
-    dist_goal = max(abs(gr - fr), abs(gc - fc))        # farther from goal = better for hounds
-    fox_moves = len(_legal_fox_moves(board))           # fewer fox moves = better
-    hounds_ahead = sum(1 for (hr, hc) in np.argwhere(board.board == 1) if hr <= fr)
-    return 6.0*dist_goal - 4.0*fox_moves + 2.0*hounds_ahead
+    dist_goal = max(
+        abs(gr - fr), abs(gc - fc)
+    )  # farther from goal = better for hounds
+    fox_moves = len(_legal_fox_moves(board))  # fewer fox moves = better
+    hounds_ahead = sum(
+        1 for (hr, hc) in np.argwhere(board.board == 1) if hr <= fr
+    )
+    return 6.0 * dist_goal - 4.0 * fox_moves + 2.0 * hounds_ahead
+
 
 # --- Hounds AIs ---
+
 
 def Hounds_Random_AI(board: GameBoard):
     """Uniform random legal hound move ((fr,fc),(tr,tc)) or None if no moves."""
@@ -76,10 +105,13 @@ def Hounds_Random_AI(board: GameBoard):
     if not moves:
         return None
     import random
+
     return random.choice(moves)
+
 
 def Hounds_Minimax_AI(board: GameBoard, depth: int = 4):
     """Choose a hound move via minimax with alpha–beta pruning."""
+
     def max_value(b, d, alpha, beta):
         term = _is_terminal(b)
         if term is not None or d == 0:
@@ -87,7 +119,7 @@ def Hounds_Minimax_AI(board: GameBoard, depth: int = 4):
         best_val, best_mv = -math.inf, None
         for mv in _legal_hound_moves(b):
             nb = _apply_hound_move_clone(b, mv)
-            val, _ = min_value(nb, d-1, alpha, beta)
+            val, _ = min_value(nb, d - 1, alpha, beta)
             if val > best_val:
                 best_val, best_mv = val, mv
             alpha = max(alpha, best_val)
@@ -102,7 +134,7 @@ def Hounds_Minimax_AI(board: GameBoard, depth: int = 4):
         best_val = math.inf
         for mv in _legal_fox_moves(b):
             nb = _apply_fox_move_clone(b, mv)
-            val, _ = max_value(nb, d-1, alpha, beta)
+            val, _ = max_value(nb, d - 1, alpha, beta)
             if val < best_val:
                 best_val = val
             beta = min(beta, best_val)
@@ -113,13 +145,15 @@ def Hounds_Minimax_AI(board: GameBoard, depth: int = 4):
     _, move = max_value(board, depth, -math.inf, math.inf)
     return move
 
+
 def Hounds_Minimax_AI_d4(board: GameBoard):
     """Named callable wrapper for depth=4 (nice in your tables)."""
     return Hounds_Minimax_AI(board, depth=4)
 
+
 # Random Hounds turn
 my_board.current_player = "HOUNDS"
-hm = Hounds_Random_AI(my_board)    # -> ((fr,fc),(tr,tc))
+hm = Hounds_Random_AI(my_board)  # -> ((fr,fc),(tr,tc))
 if hm is not None:
     my_board.move_piece(hm[0], hm[1])
     my_board.render_board()
@@ -133,4 +167,4 @@ if hm is not None:
 
 # Hound logic
 elif piece == 1:
-    dirs = [(-1, -1), (-1, 1)]   # was [(-1, 1), (-1, 1)]
+    dirs = [(-1, -1), (-1, 1)]  # was [(-1, 1), (-1, 1)]
